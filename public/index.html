@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Exchange La Paz: casa de cambio en La Paz, Bolivia. Tasas de compra y venta del día y conversor de divisas.">
+<title>Exchange La Paz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<!--
+  Prototipo estático de Exchange La Paz (modernización del sitio actual).
+  Cada <section> está marcada con el partial Blade que le correspondería,
+  p. ej. resources/views/partials/rates.blade.php. Las filas repetidas
+  llevan un comentario @foreach para pasarlas a Blade/Livewire.
+  Tasas, testimonios y referencia BCB son DATOS DE EJEMPLO.
+-->
+<style>
+/* Layout: cabecera fija · hero con pizarra de tasas a la derecha · bandas alternas · contacto en dos columnas.
+   Base heredada del sitio actual: azul #000BDD, tarjetas con radio 20/15/12 y paneles de vidrio (blur 10px). */
+:root{
+  --brand:#000BDD;          /* azul del sitio actual */
+  --brand-deep:#00067F;
+  --brand-soft:#E8EAFF;
+  --sun:#FFB71B;            /* acento cálido, uso puntual */
+  --bg:#F6F7FC;
+  --surface:#FFFFFF;
+  --ink:#0C0F2E;
+  --muted:#565B7D;
+  --line:#DCDFF0;
+  --on-brand:#FFFFFF;
+  --buy:#0A8F5B;            /* compra */
+  --sell:#C2410C;           /* venta */
+  --glass:rgba(255,255,255,.10);
+  --glass-strong:rgba(255,255,255,.16);
+  --glass-line:rgba(255,255,255,.22);
+  --shadow:0 20px 60px rgba(0,6,127,.22);
+  --r-xl:20px; --r-lg:15px; --r-md:12px;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --brand:#3D47FF; --brand-deep:#0A0F6B; --brand-soft:#161B4A; --sun:#FFC54D;
+    --bg:#080A1C; --surface:#10142E; --ink:#ECEEFF; --muted:#A3A8CF; --line:#262B52;
+    --buy:#34D399; --sell:#FB923C; --shadow:0 20px 60px rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --brand:#3D47FF; --brand-deep:#0A0F6B; --brand-soft:#161B4A; --sun:#FFC54D;
+  --bg:#080A1C; --surface:#10142E; --ink:#ECEEFF; --muted:#A3A8CF; --line:#262B52;
+  --buy:#34D399; --sell:#FB923C; --shadow:0 20px 60px rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--f-display);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.02em}
+p{margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brand)}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.3rem;border-radius:999px;font-weight:700;text-decoration:none;border:2px solid transparent;cursor:pointer;font:inherit;font-weight:700;transition:transform .15s,background .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--brand);color:var(--on-brand)}
+.btn-primary:hover{background:var(--brand-deep)}
+.btn-ghost{border-color:var(--line);color:var(--ink);background:var(--surface)}
+.btn-sun{background:var(--sun);color:#1A1300}
+svg.i{width:1.15em;height:1.15em;flex:none}
+
+/* ===== header — partials/header.blade.php ===== */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:1.5rem;padding-block:.75rem}
+.logo{display:flex;align-items:center;gap:.6rem;text-decoration:none;font-family:var(--f-display);font-weight:800;font-size:1.15rem}
+.logo-mark{width:38px;height:38px;border-radius:var(--r-md);background:var(--brand);display:grid;place-items:center;color:var(--on-brand)}
+.nav{display:flex;gap:1.25rem;margin-left:auto;font-weight:600;font-size:.95rem}
+.nav a{text-decoration:none;color:var(--muted)}
+.nav a:hover{color:var(--ink)}
+@media (max-width:860px){.nav{display:none}.top .btn{margin-left:auto}}
+
+/* ===== hero + pizarra — partials/hero.blade.php + partials/rates.blade.php ===== */
+.hero{padding-block:clamp(2.5rem,6vw,4.5rem)}
+.hero .wrap{display:grid;grid-template-columns:1fr 1.05fr;gap:clamp(2rem,5vw,4rem);align-items:center}
+.hero h1{font-size:clamp(2.3rem,5.4vw,4rem);font-weight:800;margin-block:.75rem 1rem}
+.hero h1 em{font-style:normal;color:var(--brand)}
+.hero .lead{color:var(--muted);font-size:1.1rem;max-width:34rem}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem}
+.asfi{display:inline-flex;gap:.5rem;align-items:center;font-size:.85rem;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:.35rem .8rem;border-radius:999px}
+.facts{display:flex;flex-wrap:wrap;gap:1.5rem 2.25rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--line)}
+.facts b{display:block;font-family:var(--f-display);font-size:1.5rem}
+.facts span{font-size:.85rem;color:var(--muted)}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr}}
+
+.board{background:var(--brand);color:var(--on-brand);border-radius:var(--r-xl);padding:clamp(20px,3.5vw,32px);box-shadow:var(--shadow);position:relative;overflow:hidden;min-width:0}
+.board::after{content:"";position:absolute;inset:auto -80px -120px auto;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(255,183,27,.35),transparent 70%);pointer-events:none}
+.board-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1.1rem}
+.board-head h2{font-size:1.4rem}
+.board-head p{font-size:.85rem;opacity:.8}
+.live{display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--glass-strong);border:1px solid var(--glass-line);padding:.3rem .65rem;border-radius:999px;white-space:nowrap}
+.live::before{content:"";width:7px;height:7px;border-radius:50%;background:#4ADE80}
+.glass{background:var(--glass);backdrop-filter:blur(10px);border:1px solid var(--glass-line);border-radius:var(--r-lg)}
+.rates-scroll{overflow-x:auto}
+table.rates{width:100%;border-collapse:collapse;font-size:.95rem}
+.rates th{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700;text-align:right;padding:.85rem 1rem;opacity:.75}
+.rates th:first-child,.rates td:first-child{text-align:left}
+.rates td{padding:.7rem 1rem;border-top:1px solid var(--glass-line);text-align:right;white-space:nowrap}
+.rates tr:hover td{background:rgba(255,255,255,.06)}
+.cur{display:flex;align-items:center;gap:.65rem}
+.flag{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-mono);font-size:.7rem;font-weight:700;background:rgba(255,255,255,.95);color:var(--brand-deep);flex:none}
+.cur small{display:block;font-size:.75rem;opacity:.7}
+.rates .num{font-size:1.05rem;font-weight:700}
+.rates .unit{opacity:.7;font-size:.8rem}
+.board-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem 1rem;margin-top:1rem;font-size:.8rem;opacity:.85}
+.ref{display:flex;flex-wrap:wrap;gap:.5rem 1.25rem;align-items:center;margin-top:1rem;padding:.8rem 1rem;font-size:.85rem}
+.ref strong{font-weight:700}
+.tag-ej{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--sun);color:#1A1300;padding:.15rem .45rem;border-radius:6px}
+
+/* ===== secciones ===== */
+.band{padding-block:clamp(3rem,7vw,5.5rem)}
+.band-alt{background:var(--surface);border-block:1px solid var(--line)}
+.sec-head{max-width:40rem;margin-bottom:2.25rem}
+.sec-head h2{font-size:clamp(1.8rem,3.6vw,2.6rem);font-weight:800;margin-top:.5rem}
+.sec-head p{color:var(--muted);margin-top:.75rem}
+
+/* ===== conversor — livewire/converter.blade.php ===== */
+.conv{background:var(--brand);color:var(--on-brand);border-radius:var(--r-xl);padding:clamp(20px,4vw,40px);box-shadow:var(--shadow);display:grid;grid-template-columns:1.1fr 1fr;gap:1.5rem}
+@media (max-width:820px){.conv{grid-template-columns:1fr}}
+.conv-form{padding:clamp(18px,3vw,30px);display:grid;gap:1.1rem;min-width:0}
+.conv label{display:block;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.4rem;opacity:.9}
+.conv select,.conv input{width:100%;padding:15px 20px;border:2px solid var(--glass-line);border-radius:var(--r-md);background:rgba(255,255,255,.95);color:#0C0F2E;font:inherit;font-size:1rem;color-scheme:light}
+.conv input{font-family:var(--f-mono);font-size:1.15rem;font-weight:700}
+.conv select:focus,.conv input:focus{outline:none;box-shadow:0 0 0 3px rgba(255,255,255,.35)}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:rgba(0,0,0,.18);border-radius:var(--r-md);padding:4px;gap:4px}
+.seg button{border:0;border-radius:9px;padding:.7rem .5rem;font:inherit;font-weight:700;font-size:.9rem;background:transparent;color:var(--on-brand);cursor:pointer}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--brand-deep)}
+.conv-out{padding:clamp(18px,3vw,30px);background:var(--glass-strong);display:flex;flex-direction:column;justify-content:center;gap:.5rem;min-width:0}
+.conv-out .lbl{font-size:.85rem;opacity:.85}
+.conv-out .amount{font-family:var(--f-mono);font-size:clamp(2rem,6vw,3rem);font-weight:700;line-height:1.1;text-shadow:0 2px 10px rgba(0,0,0,.2);overflow-wrap:anywhere}
+.conv-out .rate{font-size:.9rem;opacity:.85}
+.conv-out .btn{margin-top:1rem;align-self:flex-start}
+
+/* ===== por qué — partials/features.blade.php ===== */
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+@media (max-width:820px){.features{grid-template-columns:1fr}}
+.feat{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-xl);padding:1.75rem;display:grid;gap:.6rem;align-content:start}
+.feat .ico{width:48px;height:48px;border-radius:var(--r-md);background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;margin-bottom:.4rem}
+.feat h3{font-size:1.25rem}
+.feat p{color:var(--muted)}
+
+/* ===== nosotros ===== */
+.about{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,5vw,4rem);align-items:start}
+.about p+p{margin-top:1rem}
+.about .copy{color:var(--muted);font-size:1.05rem}
+@media (max-width:820px){.about{grid-template-columns:1fr}}
+
+/* ===== testimonios — partials/testimonials.blade.php ===== */
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+@media (max-width:900px){.quotes{grid-template-columns:1fr}}
+.quote{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);padding:1.6rem;display:flex;flex-direction:column;gap:1rem}
+.stars{color:var(--sun);letter-spacing:.15em}
+.quote blockquote{margin:0;font-size:1.02rem}
+.who{display:flex;align-items:center;gap:.75rem;margin-top:auto}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-weight:800}
+.who small{display:block;color:var(--muted);font-size:.8rem}
+
+/* ===== contacto — partials/contact.blade.php ===== */
+.contact{display:grid;grid-template-columns:.9fr 1.1fr;gap:1.5rem}
+@media (max-width:860px){.contact{grid-template-columns:1fr}}
+.info{background:var(--brand);color:var(--on-brand);border-radius:var(--r-xl);padding:clamp(22px,3.5vw,36px);display:grid;gap:1.25rem;align-content:start}
+.info h3{font-size:1.5rem}
+.info-row{display:flex;gap:.9rem;align-items:flex-start;padding:1rem;}
+.info-row .k{font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.8}
+.info-row .v{font-weight:700;font-size:1.05rem}
+.social{display:flex;gap:.5rem;flex-wrap:wrap}
+.social a{padding:.45rem .9rem;border-radius:999px;background:var(--glass-strong);border:1px solid var(--glass-line);text-decoration:none;font-weight:600;font-size:.9rem}
+.form{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);padding:clamp(22px,3.5vw,36px);display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form h3{grid-column:1/-1;font-size:1.5rem}
+.form .full{grid-column:1/-1}
+.form label{display:block;font-size:.85rem;font-weight:600;margin-bottom:.35rem}
+.form label span{color:var(--sell)}
+.form input,.form textarea{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:var(--r-md);background:var(--bg);color:var(--ink);font:inherit}
+.form input:focus,.form textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.form textarea{min-height:120px;resize:vertical}
+.form .ok{grid-column:1/-1;color:var(--buy);font-weight:600}
+@media (max-width:520px){.form{grid-template-columns:1fr}}
+
+/* ===== footer — partials/footer.blade.php ===== */
+.foot{padding-block:2rem;color:var(--muted);font-size:.85rem}
+.foot .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:1rem}
+.foot a{color:var(--muted)}
+
+/* WhatsApp flotante */
+.wa{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:8;width:56px;height:56px;border-radius:50%;background:#25D366;color:#fff;display:grid;place-items:center;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4a.5.5 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.3c0-.1-.2-.2-.4-.3Z"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m3 17 6-6 4 4 8-8M15 7h6v6"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2Z"/></symbol>
+</svg>
+
+<!-- ============ partials/header.blade.php ============ -->
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#inicio" aria-label="Exchange La Paz, inicio">
+      <span class="logo-mark"><svg class="i" aria-hidden="true"><use href="#i-swap"/></svg></span>
+      Exchange La Paz
+    </a>
+    <nav class="nav" aria-label="Principal">
+      <a href="#tasas">Tasas</a>
+      <a href="#conversor">Conversor</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#testimonios">Testimonios</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <a class="btn btn-primary" href="https://wa.me/59168063888" target="_blank" rel="noopener">
+      <svg class="i" aria-hidden="true"><use href="#i-wa"/></svg> WhatsApp
+    </a>
+  </div>
+</header>
+
+<main id="inicio">
+<!-- ============ partials/hero.blade.php ============ -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="asfi"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg> Entidad supervisada por ASFI · Bolivia</span>
+      <h1>Cambia tus divisas en La Paz con <em>la mejor tasa</em> del día.</h1>
+      <p class="lead">Compra y venta de dólares, euros y monedas de la región con atención personalizada y operaciones seguras. Más de 20 años de trayectoria.</p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="#conversor">Calcular mi cambio</a>
+        <a class="btn btn-ghost" href="https://maps.app.goo.gl/NqRn3wXuU6WXtsnX7" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-pin"/></svg> Cómo llegar</a>
+      </div>
+      <div class="facts">
+        <div><b>20+ años</b><span>cambiando divisas</span></div>
+        <div><b>7:00–19:30</b><span>lunes a domingo</span></div>
+        <div><b>6 monedas</b><span>compra y venta</span></div>
+      </div>
+    </div>
+
+    <!-- ============ partials/rates.blade.php (Livewire: RatesBoard) ============ -->
+    <div class="board" id="tasas" aria-labelledby="t-tasas">
+      <div class="board-head">
+        <div>
+          <h2 id="t-tasas">Tasas de hoy</h2>
+          <p>Bolivianos (Bs) por unidad de moneda</p>
+        </div>
+        <span class="live">En vivo</span>
+      </div>
+      <div class="glass rates-scroll">
+        <table class="rates">
+          <thead>
+            <tr><th scope="col">Moneda</th><th scope="col">Compramos</th><th scope="col">Vendemos</th></tr>
+          </thead>
+          <tbody>
+            <!-- @foreach ($rates as $rate) -->
+            <tr><td><div class="cur"><span class="flag">USD</span><div>Dólar estadounidense<small>por 1 USD</small></div></div></td><td class="num">6,90</td><td class="num">6,97</td></tr>
+            <!-- @endforeach -->
+            <tr><td><div class="cur"><span class="flag">EUR</span><div>Euro<small>por 1 EUR</small></div></div></td><td class="num">7,48</td><td class="num">7,72</td></tr>
+            <tr><td><div class="cur"><span class="flag">BRL</span><div>Real brasileño<small>por 1 BRL</small></div></div></td><td class="num">1,18</td><td class="num">1,30</td></tr>
+            <tr><td><div class="cur"><span class="flag">PEN</span><div>Sol peruano<small>por 1 PEN</small></div></div></td><td class="num">1,82</td><td class="num">1,93</td></tr>
+            <tr><td><div class="cur"><span class="flag">CLP</span><div>Peso chileno<small>por 1.000 CLP</small></div></div></td><td class="num">7,10</td><td class="num">7,60</td></tr>
+            <tr><td><div class="cur"><span class="flag">ARS</span><div>Peso argentino<small>por 1.000 ARS</small></div></div></td><td class="num">4,80</td><td class="num">6,20</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="glass ref">
+        <span class="tag-ej">Ejemplo</span>
+        <span>Referencia BCB · USD oficial: <strong class="num">6,86</strong> compra / <strong class="num">6,96</strong> venta</span>
+      </div>
+      <div class="board-foot">
+        <span>Última actualización: <span class="num">03/11/2026 · 09:15</span></span>
+        <span>Tasas sujetas a cambio sin previo aviso</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ livewire/converter.blade.php ============ -->
+<section class="band band-alt" id="conversor">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Conversor</span>
+      <h2>¿Cuántos bolivianos recibes?</h2>
+      <p>Elige si vienes a vender o a comprar divisas. El cálculo usa nuestras tasas de compra y venta del día.</p>
+    </div>
+    <div class="conv">
+      <form class="glass conv-form" id="conv-form" onsubmit="return false">
+        <div>
+          <label id="op-l">Operación</label>
+          <div class="seg" role="group" aria-labelledby="op-l">
+            <button type="button" id="op-sell" aria-pressed="true">Vendo divisas</button>
+            <button type="button" id="op-buy" aria-pressed="false">Compro divisas</button>
+          </div>
+        </div>
+        <div>
+          <label for="conv-cur">Moneda</label>
+          <select id="conv-cur">
+            <option value="USD">USD · Dólar estadounidense</option>
+            <option value="EUR">EUR · Euro</option>
+            <option value="BRL">BRL · Real brasileño</option>
+            <option value="PEN">PEN · Sol peruano</option>
+            <option value="CLP">CLP · Peso chileno</option>
+            <option value="ARS">ARS · Peso argentino</option>
+          </select>
+        </div>
+        <div>
+          <label for="conv-amt" id="amt-l">Cantidad que entregas (USD)</label>
+          <input id="conv-amt" type="number" inputmode="decimal" min="0" step="any" value="500">
+        </div>
+      </form>
+      <div class="glass conv-out" aria-live="polite">
+        <span class="lbl" id="out-l">Recibes</span>
+        <span class="amount" id="out-amt">Bs 3.450,00</span>
+        <span class="rate" id="out-rate">Tasa de compra: 1 USD = Bs 6,90</span>
+        <a class="btn btn-sun" href="https://wa.me/59168063888" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-wa"/></svg> Reservar esta tasa</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ partials/features.blade.php ============ -->
+<section class="band" id="por-que">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">¿Por qué elegirnos?</span>
+      <h2>La opción de confianza para cambiar divisas en Bolivia</h2>
+    </div>
+    <div class="features">
+      <article class="feat">
+        <span class="ico"><svg class="i" aria-hidden="true"><use href="#i-trend"/></svg></span>
+        <h3>El mejor precio</h3>
+        <p>Tasas competitivas a nivel nacional, publicadas cada mañana con compra y venta por separado.</p>
+      </article>
+      <article class="feat">
+        <span class="ico"><svg class="i" aria-hidden="true"><use href="#i-chat"/></svg></span>
+        <h3>Atención por WhatsApp</h3>
+        <p>Escríbenos de 7:00 a 19:30, todos los días, o déjanos un mensaje en el formulario y te respondemos.</p>
+      </article>
+      <article class="feat">
+        <span class="ico"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg></span>
+        <h3>Experiencia garantizada</h3>
+        <p>Más de 20 años intercambiando divisas con una trayectoria formal, supervisada por ASFI.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ partials/about.blade.php ============ -->
+<section class="band band-alt" id="nosotros">
+  <div class="wrap about">
+    <div class="sec-head" style="margin:0">
+      <span class="eyebrow">Nosotros</span>
+      <h2>Exchange La Paz, el mejor tipo de cambio en Bolivia</h2>
+    </div>
+    <div class="copy">
+      <p>Exchange La Paz es la casa de cambio de referencia en Bolivia, reconocida por ofrecer el mejor tipo de cambio del mercado, atención personalizada y operaciones 100% seguras.</p>
+      <p>Nuestro compromiso es brindarte siempre tasas competitivas y un servicio rápido y transparente, ya seas residente o estés de visita en La Paz.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ partials/testimonials.blade.php ============ -->
+<section class="band" id="testimonios">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow">Testimonios</span>
+      <h2>Nuestros clientes confían en nosotros</h2>
+    </div>
+    <div class="quotes">
+      <!-- @foreach ($testimonials as $t) -->
+      <figure class="quote">
+        <span class="stars" aria-label="5 de 5">★★★★★</span>
+        <blockquote>Me sentí muy segura desde el primer momento. Me explicaron todo y el cambio fue rápido.</blockquote>
+        <figcaption class="who"><span class="avatar">MB</span><div>Mia Betty<small>Cliente</small></div></figcaption>
+      </figure>
+      <!-- @endforeach -->
+      <figure class="quote">
+        <span class="stars" aria-label="5 de 5">★★★★★</span>
+        <blockquote>Excelente atención y el mejor tipo de cambio que encontré en La Paz.</blockquote>
+        <figcaption class="who"><span class="avatar">TG</span><div>Timothy Goodman<small>Visitante</small></div></figcaption>
+      </figure>
+      <figure class="quote">
+        <span class="stars" aria-label="5 de 5">★★★★★</span>
+        <blockquote>He cambiado dinero en varias casas de cambio y aquí la tasa fue la más clara, sin sorpresas.</blockquote>
+        <figcaption class="who"><span class="avatar">AS</span><div>Adam Stone<small>Visitante</small></div></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ partials/contact.blade.php ============ -->
+<section class="band band-alt" id="contacto">
+  <div class="wrap contact">
+    <div class="info">
+      <h3>Datos de contacto</h3>
+      <div class="glass info-row">
+        <svg class="i" aria-hidden="true"><use href="#i-phone"/></svg>
+        <div><div class="k">Teléfono y WhatsApp</div><div class="v num">+591 680 63888</div></div>
+      </div>
+      <div class="glass info-row">
+        <svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>
+        <div><div class="k">Horario de atención</div><div class="v">Lunes a domingo, 7:00 – 19:30</div></div>
+      </div>
+      <div class="glass info-row">
+        <svg class="i" aria-hidden="true"><use href="#i-pin"/></svg>
+        <div><div class="k">Ubicación</div><div class="v"><a href="https://maps.app.goo.gl/NqRn3wXuU6WXtsnX7" target="_blank" rel="noopener">Ver en Google Maps</a></div></div>
+      </div>
+      <div>
+        <div class="k" style="font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.8;margin-bottom:.5rem">Síguenos</div>
+        <div class="social">
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener">Facebook</a>
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a>
+          <a href="https://www.tiktok.com/" target="_blank" rel="noopener">TikTok</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- action="{{ route('contact.store') }}" method="POST" @csrf -->
+    <form class="form" id="contact-form" novalidate>
+      <h3>Envíanos un mensaje</h3>
+      <div><label for="f-name">Nombre <span>*</span></label><input id="f-name" name="nombre" required autocomplete="given-name"></div>
+      <div><label for="f-last">Apellidos</label><input id="f-last" name="apellidos" autocomplete="family-name"></div>
+      <div><label for="f-mail">Correo electrónico <span>*</span></label><input id="f-mail" name="email" type="email" required autocomplete="email"></div>
+      <div><label for="f-tel">Teléfono (WhatsApp)</label><input id="f-tel" name="telefono" type="tel" autocomplete="tel"></div>
+      <div class="full"><label for="f-msg">Mensaje</label><textarea id="f-msg" name="mensaje"></textarea></div>
+      <div class="full"><button class="btn btn-primary" type="submit">Enviar mensaje</button></div>
+      <p class="ok" id="f-ok" hidden>Mensaje listo. En el sitio real se enviará al equipo de Exchange La Paz.</p>
+    </form>
+  </div>
+</section>
+</main>
+
+<!-- ============ partials/footer.blade.php ============ -->
+<footer class="foot">
+  <div class="wrap">
+    <span>© 2026 Exchange La Paz · Entidad supervisada por ASFI</span>
+    <a href="#inicio">Volver arriba</a>
+  </div>
+</footer>
+
+<a class="wa" href="https://wa.me/59168063888" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp"><svg class="i" style="width:28px;height:28px" aria-hidden="true"><use href="#i-wa"/></svg></a>
+
+<script>
+// Datos de ejemplo. En Laravel: @json($rates) desde la tabla rates (unit = unidades por cotización).
+const RATES = {
+  USD:{buy:6.90, sell:6.97, unit:1},
+  EUR:{buy:7.48, sell:7.72, unit:1},
+  BRL:{buy:1.18, sell:1.30, unit:1},
+  PEN:{buy:1.82, sell:1.93, unit:1},
+  CLP:{buy:7.10, sell:7.60, unit:1000},
+  ARS:{buy:4.80, sell:6.20, unit:1000},
+};
+const fmt = (n, d=2) => n.toLocaleString('es-BO',{minimumFractionDigits:d,maximumFractionDigits:d});
+const $ = id => document.getElementById(id);
+let op = 'sell'; // el cliente vende divisas → usamos nuestra tasa de compra
+
+function calc(){
+  const cur = $('conv-cur').value, r = RATES[cur];
+  const amt = parseFloat($('conv-amt').value) || 0;
+  const unitTxt = r.unit === 1 ? '1 ' + cur : fmt(r.unit,0) + ' ' + cur;
+  if (op === 'sell'){
+    $('amt-l').textContent = `Cantidad que entregas (${cur})`;
+    $('out-l').textContent = 'Recibes';
+    $('out-amt').textContent = 'Bs ' + fmt(amt * r.buy / r.unit);
+    $('out-rate').textContent = `Tasa de compra: ${unitTxt} = Bs ${fmt(r.buy)}`;
+  } else {
+    $('amt-l').textContent = `Cantidad que quieres recibir (${cur})`;
+    $('out-l').textContent = 'Pagas';
+    $('out-amt').textContent = 'Bs ' + fmt(amt * r.sell / r.unit);
+    $('out-rate').textContent = `Tasa de venta: ${unitTxt} = Bs ${fmt(r.sell)}`;
+  }
+}
+function setOp(v){
+  op = v;
+  $('op-sell').setAttribute('aria-pressed', v === 'sell');
+  $('op-buy').setAttribute('aria-pressed', v === 'buy');
+  calc();
+}
+$('op-sell').addEventListener('click', () => setOp('sell'));
+$('op-buy').addEventListener('click', () => setOp('buy'));
+$('conv-cur').addEventListener('change', calc);
+$('conv-amt').addEventListener('input', calc);
+calc();
+
+$('contact-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const f = e.target;
+  if (!f.checkValidity()){ f.reportValidity(); return; }
+  $('f-ok').hidden = false;
+});
+</script>
+</body>
+</html>
